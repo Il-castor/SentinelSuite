@@ -1,0 +1,5 @@
+{
+    "send-topic-data": "esp8266/rfid-reader",
+    "subscribe": "esp8266/sensor/door",
+    "buzzer": [1000,1000]
+}

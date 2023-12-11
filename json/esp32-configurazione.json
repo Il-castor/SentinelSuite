@@ -1,0 +1,14 @@
+{
+    "timeToSendDataTempHum": 2000,
+    "timeToSendDataFlameWater": 5000,
+    "temperature_topic": "esp32/temperature",
+    "unit": "C",
+    "temperature_subscribe": "esp32/fan",
+    "humidity_topic": "esp32/humidity",
+    "humidity_subscribe": "esp32/deum",
+    "sendWater": "esp32/water",
+    "treshold": 300,
+    "waterPump": "esp32/waterPump",
+    "sendFire": "esp32/fire",
+    "subFire": "esp32/fireof"
+}
