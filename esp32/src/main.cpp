@@ -16,6 +16,10 @@
 #define RED_LED 16
 #define BLUE_LED 18
 
+#define RED_SMD 22
+#define GREEN_SMD 21
+#define BLU_SMD 23
+
 #define DO_PIN 27 // ESP32's pin GPIO13 connected to DO pin of the flame sensor
 
 #define DHTPIN 4
@@ -45,6 +49,13 @@ void setColor(int red, int green, int blue)
   analogWrite(RED_LED, red);
   analogWrite(GREEN_LED, green);
   analogWrite(BLUE_LED, blue);
+}
+
+void setSMDcolor(int red, int green, int blue)
+{
+  analogWrite(RED_SMD, red);
+  analogWrite(GREEN_SMD, green);
+  analogWrite(BLU_SMD, blue);
 }
 
 void stateLedTemperature(String pl2)
@@ -88,12 +99,33 @@ void pumpWater(bool action)
   if (action)
   {
     Serial.println("ACCENDO LA POMPA");
-    setColor(0, 0, 255); // blue
+    setSMDcolor(0, 0, 255); // blue
   }
   else
   {
     Serial.println("Spengo la pompa");
-    setColor(255, 36, 86); // rose
+    setSMDcolor(255, 36, 86); // rose
+  }
+}
+
+void fireSystem(bool action)
+{
+  if (action)
+  {
+    Serial.println("ACCENDO SISTEMA ANTINCENDIO");
+    for (int i = 0; i < 3; i++)
+    {
+      setSMDcolor(255, 0, 0);
+      delay(500);
+      setSMDcolor(0, 0, 0);
+      delay(500);
+    }
+    setSMDcolor(0, 0, 0);
+  }
+  else
+  {
+    Serial.println("Spengo sistema antincendio");
+    setSMDcolor(255, 36, 86); // rose
   }
 }
 
@@ -191,6 +223,21 @@ void callback(char *topic, byte *payload, unsigned int length)
     else
       pumpWater(false);
   }
+  else if (((String)topic).equals(subFire))
+  {
+    String pl3;
+    for (int i = 0; i < length; i++)
+    {
+      pl3 += (char)payload[i];
+    }
+    if (pl3.toInt() == lastValue)
+      return;
+    else if (pl3.equals("1"))
+      // bisogna spegnere l'incendio
+      fireSystem(true);
+    else
+      fireSystem(false);
+  }
 }
 
 void setup_wifi()
@@ -267,6 +314,10 @@ void setup()
   pinMode(BLUE_LED, OUTPUT);
   pinMode(DO_PIN, INPUT);
   pinMode(POWER_PIN, OUTPUT);
+
+  pinMode(RED_SMD, OUTPUT);
+  pinMode(GREEN_SMD, OUTPUT);
+  pinMode(BLU_SMD, OUTPUT);
 
   setColor(0, 0, 255);
 
