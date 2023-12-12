@@ -85,10 +85,16 @@ void stateLed(String pl2)
     delay(3000);
     setColor(0, 0, 0);
   }
-  else if (pl2.equals("-1")) //disable RFID reader 
+  else if (pl2.equals("-1")){ //disable RFID reader 
     isReader = false;
-  else if (pl2.equals("-2"))
+    setColor(255, 0, 0);
+    }
+  else if (pl2.equals("-2")){
     isReader = true;
+    setColor(0, 255, 0);
+    delay(1000);
+    setColor(0, 0, 0);
+  }
 }
 
 void callback(char *topic, byte *payload, unsigned int length)
@@ -256,7 +262,7 @@ void loop() {
     reconnect();
 
   client.loop();
-  if (isReader == true)
+  if (isReader)
     readNfc();
     
 
