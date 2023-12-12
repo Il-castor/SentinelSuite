@@ -52,16 +52,16 @@ void stateLedTemperature(String pl2)
   switch (pl2.toInt())
   {
   case 0:
-    setColor(255, 255, 255);
+    setColor(255, 255, 255); // white
     break;
   case 1:
-    setColor(0, 0, 255);
+    setColor(128, 0, 128); // purple
     break;
   case 2:
-    setColor(0, 255, 0);
+    setColor(0, 255, 0); // green
     break;
   case 3:
-    setColor(255, 0, 0);
+    setColor(255, 0, 0); // red
     break;
   default:
     break;
@@ -70,14 +70,16 @@ void stateLedTemperature(String pl2)
 
 void stateLedHumidity(String pl2)
 {
-  if (pl2.equals("0"))
-  { // accendo led bianco quindi tutto ok, no deum
-    setColor(0, 0, 0);
-  }
-  else if (pl2.equals("1"))
+  switch (pl2.toInt())
   {
-    // arancione => deumidificatore acceso
-    setColor(255, 165, 0);
+  case 0:
+    setColor(0, 0, 0); // black => ok, no deum
+    break;
+  case 1:
+    setColor(255, 165, 0); // orange => deum on
+    break;
+  default:
+    break;
   }
 }
 
@@ -86,17 +88,16 @@ void pumpWater(bool action)
   if (action)
   {
     Serial.println("ACCENDO LA POMPA");
-    // blue color
-    setColor(0, 0, 255);
+    setColor(0, 0, 255); // blue
   }
   else
   {
     Serial.println("Spengo la pompa");
-    // rose color
-    setColor(255, 36, 86);
+    setColor(255, 36, 86); // rose
   }
 }
 
+int lastValue;
 void callback(char *topic, byte *payload, unsigned int length)
 {
   String pl;
@@ -107,11 +108,9 @@ void callback(char *topic, byte *payload, unsigned int length)
 
   for (unsigned int i = 0; i < length; i++)
   {
-    // Serial.print((char)payload[i]);
     pl += (char)payload[i];
   }
 
-  // Ho payload come stringa
   Serial.println(pl);
   DynamicJsonDocument doc(4096);
 
@@ -126,13 +125,10 @@ void callback(char *topic, byte *payload, unsigned int length)
 
   if (((String)topic).equals(SUBSCRIBE_TOPIC))
   {
-    Serial.println("PRimo if");
     timeToSendDataTempHum = doc["timeToSendDataTempHum"].as<int>();
     timeToSendDataFlameWater = doc["timeToSendDataFlameWater"].as<int>();
     temperature_topic = doc["temperature_topic"].as<String>();
-    // Serial.println("doc " + board_topic);
-    // client.subscribe(board_topic.c_str());
-    // Serial.println("Mi sono sottoscritto al topic: "+ board_topic);
+
     isCelsius = doc["unit"].as<String>();
     temperature_subscribe = doc["temperature_subscribe"].as<String>();
     client.subscribe(temperature_subscribe.c_str(), 1);
@@ -140,7 +136,6 @@ void callback(char *topic, byte *payload, unsigned int length)
     humidity_subscribe = doc["humidity_subscribe"].as<String>();
     client.subscribe(humidity_subscribe.c_str(), 1);
 
-    // // Serial.println( deep_sleep);
     sendWater = doc["sendWater"].as<String>();
     treshold = doc["treshold"].as<int>();
     waterPump = doc["waterPump"].as<String>();
@@ -163,15 +158,11 @@ void callback(char *topic, byte *payload, unsigned int length)
   }
   else if (((String)topic).equals(temperature_subscribe))
   {
-    Serial.println("Piero");
     String pl2;
     for (int i = 0; i < length; i++)
     {
-      // Serial.print((char)payload[i]);
       pl2 += (char)payload[i];
     }
-
-    // Ho payload come stringa
     Serial.println(pl2);
     stateLedTemperature(pl2);
   }
@@ -180,27 +171,21 @@ void callback(char *topic, byte *payload, unsigned int length)
     String pl3;
     for (int i = 0; i < length; i++)
     {
-      // Serial.print((char)payload[i]);
       pl3 += (char)payload[i];
     }
-
-    // Ho payload come stringa
     Serial.println(pl3);
     stateLedHumidity(pl3);
   }
   else if (((String)topic).equals(waterPump))
   {
-
     String pl3;
     for (int i = 0; i < length; i++)
     {
-      // Serial.print((char)payload[i]);
       pl3 += (char)payload[i];
     }
-
-    // Ho payload come stringa
-    Serial.println(pl3);
-    if (pl3.equals("1"))
+    if (pl3.toInt() == lastValue)
+      return;
+    else if (pl3.equals("1"))
       // bisogna spegnere l'incendio
       pumpWater(true);
     else
@@ -259,7 +244,8 @@ void reconnect()
   }
 }
 
-bool checkBound(float newValue, float prevValue, float maxDiff)
+const float maxDiff = 1.0;
+bool checkBound(float newValue, float prevValue)
 {
   return !isnan(newValue) &&
          (newValue < prevValue - maxDiff || newValue > prevValue + maxDiff);
@@ -268,7 +254,9 @@ bool checkBound(float newValue, float prevValue, float maxDiff)
 long lastMsg = 0;
 float temp = 0.0;
 float hum = 0.0;
-float diff = 1.0;
+
+int value = 0;
+int flame_state = 0;
 
 void setup()
 {
@@ -278,11 +266,11 @@ void setup()
   pinMode(RED_LED, OUTPUT);
   pinMode(BLUE_LED, OUTPUT);
   pinMode(DO_PIN, INPUT);
-  pinMode(POWER_PIN, OUTPUT); // configure pin as an OUTPUT
+  pinMode(POWER_PIN, OUTPUT);
 
   setColor(0, 0, 255);
 
-  digitalWrite(POWER_PIN, LOW); // turn the sensor OFF
+  digitalWrite(POWER_PIN, LOW); // turn the water sensor OFF
 
   setup_wifi();
   client.setServer(MQTT_SERVER, 1883);
@@ -299,13 +287,9 @@ void setup()
     Serial.println("Connessione al broker MQTT fallita");
 
   dht.begin();
-  // setColor(255, 0, 0);
 
   Serial.println("I'm ready!");
 }
-
-int value = 0;
-int flame_state = 0;
 
 void tempHumidity()
 {
@@ -323,7 +307,7 @@ void tempHumidity()
     if (isnan(newTemp) || isnan(newHum))
       return;
 
-    if (checkBound(newTemp, temp, diff))
+    if (checkBound(newTemp, temp))
     {
       temp = newTemp;
       Serial.print("New temperature:");
@@ -331,14 +315,13 @@ void tempHumidity()
       client.publish(temperature_topic.c_str(), String(temp).c_str());
     }
 
-    if (checkBound(newHum, hum, diff))
+    if (checkBound(newHum, hum))
     {
       hum = newHum;
       Serial.print("New humidity:");
       Serial.println(String(hum).c_str());
       client.publish(humidity_topic.c_str(), String(hum).c_str());
     }
-    Serial.println("Sono tempHumidity function");
   }
 }
 
@@ -358,29 +341,32 @@ void flameWater()
     if (value > treshold)
     {
       Serial.println("ATTENZIONE");
-      // pubblico 1 se rilevo water leakage
+      // pubblic on if i detect water leakage
       client.publish(sendWater.c_str(), "on");
+    }
+    else
+    {
+      Serial.println("No water leak");
+      // pubblic on if i detect water leakage
+      client.publish(sendWater.c_str(), "off");
     }
     flame_state = digitalRead(DO_PIN);
     // Serial.println(flame_state);
     if (flame_state == HIGH)
     {
       Serial.println("Flame dected => The fire is detected");
-      // client.publish(sendFire.c_str(), "1");
+      client.publish(sendFire.c_str(), "1");
     }
     else
     {
       Serial.println("No flame dected => The fire is NOT detected");
-
-      // client.publish(sendFire.c_str(), "0");
+      client.publish(sendFire.c_str(), "0");
     }
-    Serial.println("Sono flameWater function");
   }
 }
 
 void loop()
 {
-
   if (!client.connected())
     reconnect();
 
