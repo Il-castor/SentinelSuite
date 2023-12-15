@@ -91,7 +91,11 @@ void stateLed(String pl2)
     }
   else if (pl2.equals("-2")){
     isReader = true;
-    setColor(0, 255, 0);
+    setColor(128, 0, 128);
+    delay(1000);
+    setColor(0, 0, 0);
+    delay(1000);
+    setColor(128, 0, 128);
     delay(1000);
     setColor(0, 0, 0);
   }
