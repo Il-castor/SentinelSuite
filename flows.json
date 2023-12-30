@@ -1,0 +1,1779 @@
+[
+    {
+        "id": "f6f2187d.f17ca8",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "47828a8eade31866",
+        "type": "mqtt in",
+        "z": "f6f2187d.f17ca8",
+        "name": "esp32",
+        "topic": "esp32/#",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "fb9bd3109e3c5603",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 90,
+        "y": 280,
+        "wires": [
+            [
+                "7dea4273ca2365e8",
+                "9756a6c43912c57c"
+            ]
+        ]
+    },
+    {
+        "id": "7dea4273ca2365e8",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug-esp32",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 170,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "9756a6c43912c57c",
+        "type": "switch",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "property": "topic",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "esp32/temperature",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "esp32/humidity",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "esp32/fire",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "esp32/water",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 4,
+        "x": 290,
+        "y": 280,
+        "wires": [
+            [
+                "3668c4b630eba382",
+                "4b3fcd4bdafa6ae1",
+                "4b101e3838f294fa",
+                "9e2647e6c56bf284"
+            ],
+            [
+                "9ea081e00bb6f809",
+                "76133e2a437b861d",
+                "b08ecc810cea6c25",
+                "6b95d303bbc06b61"
+            ],
+            [
+                "da9f0f4552e40eb8"
+            ],
+            [
+                "fd7037a871737459"
+            ]
+        ]
+    },
+    {
+        "id": "90defc060b4397f3",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug-temperatura",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1010,
+        "y": 20,
+        "wires": []
+    },
+    {
+        "id": "9ea081e00bb6f809",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "funzione-umidità",
+        "func": "if (msg.payload >= 40 && msg.payload <= 60) {\n    msg.payload = '0'; // deumidificatore spento\n} else if (msg.payload > 60 )\n    msg.payload = '1'; //deumidificatore acceso\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 400,
+        "wires": [
+            [
+                "19cb13cc70f1dc44",
+                "ee05e719cbb4ea0d",
+                "04a0c7f3beea9e2f"
+            ]
+        ]
+    },
+    {
+        "id": "19cb13cc70f1dc44",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "messaggio in base umidità",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "ee05e719cbb4ea0d",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "accendo spengo deumidificatore",
+        "topic": "esp32/deum",
+        "qos": "0",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "fb9bd3109e3c5603",
+        "x": 710,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "3668c4b630eba382",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "accensione-spegnimento-ventilatore",
+        "func": "if (msg.payload <= 20) \n    msg.payload = '0'; //off non accendo il condizionatore\n else if (msg.payload > 20 && msg.payload <= 30) \n    msg.payload = '1'; // = low condizionatore low\nelse if (msg.payload > 30 && msg.payload <= 35)\n    msg.payload = '2'; // = medium\nelse \n    msg.payload = '3'; // = high\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 530,
+        "y": 80,
+        "wires": [
+            [
+                "90defc060b4397f3",
+                "b83e49a05bfbb0ac",
+                "0ace8572b3d27763",
+                "699286b3a38df065"
+            ]
+        ]
+    },
+    {
+        "id": "b83e49a05bfbb0ac",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "accensione-spegnimento-ventilatore",
+        "topic": "esp32/fan",
+        "qos": "0",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "fb9bd3109e3c5603",
+        "x": 970,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "4b3fcd4bdafa6ae1",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "log temperature function",
+        "func": "var temperature = msg.payload; // Assuming temperature data is directly available in payload\n\nvar timestamp = Date.now();\nvar date = new Date(timestamp);\nvar formattedData = date.toISOString();\n\n// Create log message\nvar logMessage = formattedData + ' - Temperature: ' + temperature + '°C';\n\n// Prepare the message payload for logging\nmsg.payload = logMessage;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 490,
+        "y": 20,
+        "wires": [
+            [
+                "c00e48d80a99db30"
+            ]
+        ]
+    },
+    {
+        "id": "c00e48d80a99db30",
+        "type": "file",
+        "z": "f6f2187d.f17ca8",
+        "name": "log file temperature",
+        "filename": "/home/castor/.node-red/log/temperature.log",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "false",
+        "encoding": "none",
+        "x": 770,
+        "y": 20,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "76133e2a437b861d",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "log humidity function ",
+        "func": "var humidity = msg.payload; // Assuming humidity data is directly available in payload\nvar timestamp = Date.now();\nvar date = new Date(timestamp);\nvar formattedData = date.toISOString();\n\n// Create log message\nvar logMessage = formattedData + ' - Humidity: ' + humidity + '%';\n\n// Prepare the message payload for logging\nmsg.payload = logMessage;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 340,
+        "wires": [
+            [
+                "8ca360b1df163098"
+            ]
+        ]
+    },
+    {
+        "id": "8ca360b1df163098",
+        "type": "file",
+        "z": "f6f2187d.f17ca8",
+        "name": "log file for humidity ",
+        "filename": "/home/castor/.node-red/log/humidity.log",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "false",
+        "encoding": "none",
+        "x": 690,
+        "y": 340,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5f4af45040cbb83f",
+        "type": "mqtt in",
+        "z": "f6f2187d.f17ca8",
+        "name": "esp8266 rfid",
+        "topic": "esp8266/rfid-reader",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "fb9bd3109e3c5603",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 130,
+        "y": 900,
+        "wires": [
+            [
+                "d4cbe6ed585bb277",
+                "adec4c8f17377bbb",
+                "da8e2e4865163fe9",
+                "2537fcac5cf5e2a8",
+                "26764479f4f39f8f"
+            ]
+        ]
+    },
+    {
+        "id": "d4cbe6ed585bb277",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug esp8266",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 340,
+        "y": 900,
+        "wires": []
+    },
+    {
+        "id": "adec4c8f17377bbb",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "check rfid access ",
+        "func": "var payloadBuffer = msg.payload; \nconst tesseraMagnetica = \"33c30d02\"; \n\n\nvar timestamp = Date.now();\nvar date = new Date(timestamp);\nvar formattedData = date.toISOString();\nif (payloadBuffer.toLowerCase() === tesseraMagnetica)\n    //user has access \n    msg.payload = formattedData + ' Access granted to uid: ' + tesseraMagnetica;\nelse \n    //not access \n    msg.payload = formattedData + 'Access NOT granted to uid: ' + tesseraMagnetica;\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 1000,
+        "wires": [
+            [
+                "92353d0642ec8fa6",
+                "40544cc865044b02"
+            ]
+        ]
+    },
+    {
+        "id": "92353d0642ec8fa6",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "pino ",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 550,
+        "y": 1000,
+        "wires": []
+    },
+    {
+        "id": "40544cc865044b02",
+        "type": "file",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "filename": "/home/castor/.node-red/log/rfid.log",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "false",
+        "encoding": "none",
+        "x": 640,
+        "y": 1080,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "da8e2e4865163fe9",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "d": true,
+        "name": "check access",
+        "func": "var payloadBuffer = msg.payload; \nconst tesseraMagnetica = \"33c30d02\"; \n\n\n\nif (payloadBuffer.toLowerCase() === tesseraMagnetica)\n    //user has access \n    msg.payload = \"1\";\nelse \n    //not access \n    msg.payload = \"0\";\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 1140,
+        "wires": [
+            [
+                "aec4d86f1aef35bc"
+            ]
+        ]
+    },
+    {
+        "id": "aec4d86f1aef35bc",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "d": true,
+        "name": "",
+        "topic": "esp8266/sensor/door",
+        "qos": "2",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "fb9bd3109e3c5603",
+        "x": 560,
+        "y": 1200,
+        "wires": []
+    },
+    {
+        "id": "4245693d8b8b4e74",
+        "type": "ui_text",
+        "z": "f6f2187d.f17ca8",
+        "group": "17c07df615b54e6b",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "rfid",
+        "label": "Last RFID Access",
+        "format": "{{msg.payload}}",
+        "layout": "col-center",
+        "className": "",
+        "style": true,
+        "font": "",
+        "fontSize": "18",
+        "color": "#ffffff",
+        "x": 950,
+        "y": 920,
+        "wires": []
+    },
+    {
+        "id": "2537fcac5cf5e2a8",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "print message on dashboard text",
+        "func": "\n\nvar payloadBuffer = msg.payload; \nconst tesseraMagnetica = \"33c30d02\"; \nlet currentDate = new Date();\nlet currentTime = currentDate.toLocaleTimeString();\n\nif (payloadBuffer.toLowerCase() === tesseraMagnetica){\n    let slicedArray = tesseraMagnetica.match(/.{1,2}/g).join(' ');\n    msg.payload = currentTime + \" => \" + slicedArray;\n    \n}\nelse {\n    //not access \n    msg.payload = \"Someone is trying  to get in \"\n}\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 660,
+        "y": 940,
+        "wires": [
+            [
+                "65dc5462c8c12c55",
+                "4245693d8b8b4e74"
+            ]
+        ]
+    },
+    {
+        "id": "48ce99b8cbff6f5a",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "topic": "esp8266/configurazione",
+        "qos": "0",
+        "retain": "true",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "fb9bd3109e3c5603",
+        "x": 790,
+        "y": 1800,
+        "wires": []
+    },
+    {
+        "id": "641e61ba4778debe",
+        "type": "inject",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 160,
+        "y": 1840,
+        "wires": [
+            [
+                "97147f842443d371"
+            ]
+        ]
+    },
+    {
+        "id": "4b101e3838f294fa",
+        "type": "ui_chart",
+        "z": "f6f2187d.f17ca8",
+        "name": "chart temperature",
+        "group": "61aa16a4269b1dac",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "label": "",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1230,
+        "y": 140,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "9e2647e6c56bf284",
+        "type": "ui_gauge",
+        "z": "f6f2187d.f17ca8",
+        "name": "gauge temperature",
+        "group": "61aa16a4269b1dac",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "gtype": "donut",
+        "title": "Actual Temperature",
+        "label": "Celsius",
+        "format": "{{value}}",
+        "min": "0",
+        "max": "50",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 1230,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "b08ecc810cea6c25",
+        "type": "ui_gauge",
+        "z": "f6f2187d.f17ca8",
+        "name": "gauge humidity",
+        "group": "3d947904435b0faa",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Actual Humidity",
+        "label": "%",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 1220,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "6b95d303bbc06b61",
+        "type": "ui_chart",
+        "z": "f6f2187d.f17ca8",
+        "name": "chart humidity",
+        "group": "3d947904435b0faa",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "label": "",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1220,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "97147f842443d371",
+        "type": "file in",
+        "z": "f6f2187d.f17ca8",
+        "name": "ESP8266 configurazione",
+        "filename": "/home/castor/.node-red/json/esp8266-configurazione.json",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 370,
+        "y": 1840,
+        "wires": [
+            [
+                "48ce99b8cbff6f5a"
+            ]
+        ]
+    },
+    {
+        "id": "c7c9e44419eda6f5",
+        "type": "inject",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 160,
+        "y": 1960,
+        "wires": [
+            [
+                "890c8b380f0c9311"
+            ]
+        ]
+    },
+    {
+        "id": "890c8b380f0c9311",
+        "type": "file in",
+        "z": "f6f2187d.f17ca8",
+        "name": "ESP32 configurazione",
+        "filename": "/home/castor/.node-red/json/esp32-configurazione.json",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 380,
+        "y": 1960,
+        "wires": [
+            [
+                "4a61ca9ccbea8f19",
+                "08bc9e9f6024ee52"
+            ]
+        ]
+    },
+    {
+        "id": "4a61ca9ccbea8f19",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "topic": "esp32/configurazione",
+        "qos": "0",
+        "retain": "true",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "fb9bd3109e3c5603",
+        "x": 720,
+        "y": 1960,
+        "wires": []
+    },
+    {
+        "id": "08bc9e9f6024ee52",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 800,
+        "y": 1860,
+        "wires": []
+    },
+    {
+        "id": "f3ad1dc86de47ba5",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "accendo spengo spegnimento fuoco",
+        "topic": "esp32/fireof",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "fb9bd3109e3c5603",
+        "x": 750,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "5519254fc9f15c49",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "output-acceso-spento",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 700,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "da9f0f4552e40eb8",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "accensione-spegnimento-fiamma",
+        "func": "if (msg.payload === 0)\n    msg.payload = '0';\nelse \n    msg.payload = '1'\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 560,
+        "wires": [
+            [
+                "5519254fc9f15c49",
+                "f3ad1dc86de47ba5",
+                "d4cb4d994b2a0c8c"
+            ]
+        ]
+    },
+    {
+        "id": "3824f7090f6904ec",
+        "type": "file",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "filename": "",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "false",
+        "encoding": "none",
+        "x": 820,
+        "y": 660,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e9ed709078a2c1c7",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "log function flame detection",
+        "func": "if (msg.payload === 1) {\n    var timestamp = new Date().toISOString();\n    \n    // Create log message for flame detection\n    var logMessage = timestamp + ' - Flame detected!';\n    \n    // Prepare the message payload for logging\n    msg.payload = logMessage;\n    return msg;\n} else {\n    return null; // If the payload is not equal to 1, do not log (return null or omit the message)\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 660,
+        "wires": [
+            [
+                "3824f7090f6904ec"
+            ]
+        ]
+    },
+    {
+        "id": "fd7037a871737459",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "accensione-spegnimento-pompa-acqua",
+        "func": "if (msg.payload === 'on')\n    msg.payload = '1';\nelse if (msg.payload === 'off')\n    msg.payload = '0'\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 760,
+        "wires": [
+            [
+                "16be863861c56743",
+                "578377b12e56ad2b",
+                "9772bda67aa8c073"
+            ]
+        ]
+    },
+    {
+        "id": "16be863861c56743",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "accendo spengo pompa acqua",
+        "topic": "esp32/waterPump",
+        "qos": "0",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "fb9bd3109e3c5603",
+        "x": 730,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "699286b3a38df065",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "enable-disable-fan",
+        "func": "var payload = msg.payload;\n\nif (payload === '0')\n    msg.payload = 'img/fan-static.png';\nelse if (payload == '1')\n    msg.payload = 'img/fan-1.gif';\nelse if (payload == '2')\n    msg.payload = 'img/fan.gif';\nelse \n    msg.payload = 'img/fan-3.gif';\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1290,
+        "y": 80,
+        "wires": [
+            [
+                "8fc6c6d858df1ceb"
+            ]
+        ]
+    },
+    {
+        "id": "8fc6c6d858df1ceb",
+        "type": "ui_media",
+        "z": "f6f2187d.f17ca8",
+        "group": "f8c0e607150ec3c8",
+        "name": "fan image ",
+        "width": 0,
+        "height": 0,
+        "order": 2,
+        "category": "img",
+        "file": "fan-static.png",
+        "layout": "center",
+        "showcontrols": true,
+        "loop": true,
+        "onstart": false,
+        "scope": "local",
+        "tooltip": "",
+        "x": 1520,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "0ace8572b3d27763",
+        "type": "ui_text",
+        "z": "f6f2187d.f17ca8",
+        "group": "f8c0e607150ec3c8",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "FAN STATE",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 870,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "e4d7618246f3497e",
+        "type": "change",
+        "z": "f6f2187d.f17ca8",
+        "name": "Set ON",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "ON",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1060,
+        "y": 440,
+        "wires": [
+            [
+                "62362ab114667481",
+                "b37513dc1b12c006"
+            ]
+        ]
+    },
+    {
+        "id": "3e88f9f4c031387f",
+        "type": "change",
+        "z": "f6f2187d.f17ca8",
+        "name": "Set OFF",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "OFF",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1060,
+        "y": 380,
+        "wires": [
+            [
+                "b37513dc1b12c006",
+                "62362ab114667481"
+            ]
+        ]
+    },
+    {
+        "id": "04a0c7f3beea9e2f",
+        "type": "switch",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 910,
+        "y": 400,
+        "wires": [
+            [
+                "3e88f9f4c031387f"
+            ],
+            [
+                "e4d7618246f3497e"
+            ]
+        ]
+    },
+    {
+        "id": "b37513dc1b12c006",
+        "type": "ui_led",
+        "z": "f6f2187d.f17ca8",
+        "order": 8,
+        "group": "f8c0e607150ec3c8",
+        "width": 1,
+        "height": 1,
+        "label": "",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#0000ff",
+                "value": "ON",
+                "valueType": "str"
+            },
+            {
+                "color": "#808080",
+                "value": "FIRE EXTINGUISHED",
+                "valueType": "str"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "led deum",
+        "x": 1300,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "62362ab114667481",
+        "type": "ui_text",
+        "z": "f6f2187d.f17ca8",
+        "group": "f8c0e607150ec3c8",
+        "order": 6,
+        "width": 5,
+        "height": 1,
+        "name": "",
+        "label": "dehumidifier ",
+        "format": "{{msg.payload}}",
+        "layout": "row-left",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": "",
+        "color": "#000000",
+        "x": 1310,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "bc12d87aa9ec91dc",
+        "type": "ui_led",
+        "z": "f6f2187d.f17ca8",
+        "order": 8,
+        "group": "f8c0e607150ec3c8",
+        "width": 1,
+        "height": 1,
+        "label": "",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#0000ff",
+                "value": "on",
+                "valueType": "str"
+            },
+            {
+                "color": "#808080",
+                "value": "off",
+                "valueType": "str"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "Led Water Pump",
+        "x": 1170,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "c3a808942cc30d0a",
+        "type": "ui_text",
+        "z": "f6f2187d.f17ca8",
+        "group": "f8c0e607150ec3c8",
+        "order": 6,
+        "width": 5,
+        "height": 1,
+        "name": "",
+        "label": "Water Pump",
+        "format": "{{msg.payload}}",
+        "layout": "row-left",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": "",
+        "color": "#000000",
+        "x": 1150,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "90f39cef9883b18a",
+        "type": "inject",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "on",
+        "payloadType": "str",
+        "x": 110,
+        "y": 560,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "1ebeac4d4be3a65c",
+        "type": "change",
+        "z": "f6f2187d.f17ca8",
+        "name": "Set OFF",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "OFF",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1160,
+        "y": 680,
+        "wires": [
+            [
+                "02b56a017d22fc08",
+                "4b1b412b6039b208"
+            ]
+        ]
+    },
+    {
+        "id": "4f97c3e6baf139fd",
+        "type": "change",
+        "z": "f6f2187d.f17ca8",
+        "name": "Set ON",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "ON",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1160,
+        "y": 540,
+        "wires": [
+            [
+                "4b1b412b6039b208",
+                "02b56a017d22fc08"
+            ]
+        ]
+    },
+    {
+        "id": "4b1b412b6039b208",
+        "type": "ui_led",
+        "z": "f6f2187d.f17ca8",
+        "order": 8,
+        "group": "f8c0e607150ec3c8",
+        "width": 1,
+        "height": 1,
+        "label": "",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "ON",
+                "valueType": "str"
+            },
+            {
+                "color": "#808080",
+                "value": "OFF",
+                "valueType": "str"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "Led Fire",
+        "x": 1400,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "02b56a017d22fc08",
+        "type": "ui_text",
+        "z": "f6f2187d.f17ca8",
+        "group": "f8c0e607150ec3c8",
+        "order": 6,
+        "width": 5,
+        "height": 1,
+        "name": "",
+        "label": "FIRE",
+        "format": "{{msg.payload}}",
+        "layout": "row-left",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": "",
+        "color": "#000000",
+        "x": 1390,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "d4cb4d994b2a0c8c",
+        "type": "switch",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1010,
+        "y": 580,
+        "wires": [
+            [
+                "4f97c3e6baf139fd"
+            ],
+            [
+                "1ebeac4d4be3a65c"
+            ]
+        ]
+    },
+    {
+        "id": "578377b12e56ad2b",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 460,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "6a208d70401a9c1f",
+        "type": "ui_template",
+        "z": "f6f2187d.f17ca8",
+        "group": "ee544e2b1a513dc3",
+        "name": "Display Video",
+        "order": 1,
+        "width": "6",
+        "height": "6",
+        "format": "<img width=\"16\" height=\"16\" src=\"http://192.168.43.157:8000/stream.mjpg\"/>\n",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": false,
+        "templateScope": "local",
+        "className": "",
+        "x": 200,
+        "y": 2060,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "65dc5462c8c12c55",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug 5",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 920,
+        "y": 1060,
+        "wires": []
+    },
+    {
+        "id": "26764479f4f39f8f",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "check rfid access and send data via mqtt",
+        "func": "var payloadBuffer = msg.payload; \nconst tesseraMagnetica = \"33c30d02\"; \n\n// Initialize counter\nif (context.get('counter') === undefined) {\n    context.set('counter', 0);\n}\nif (msg.payload == '-2'){\n    context.set('counter', c);\n    return null;\n}\n\nif (payloadBuffer.toLowerCase() === tesseraMagnetica){\n    //user has access \n    msg.payload = '1';\n    context.set('counter', 0);\n}\nelse {\n    //not access \n    msg.payload = '0';\n    var c = context.get('counter') + 1;\n    // msg.payload = c;\n    context.set('counter', c);\n    // msg.payload += ' ' + context.get(\"counter\");\n}\n\n\nif (context.get('counter') >= 5) {    \n    msg.payload = '-1'; //disabilita\n}     \n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 1320,
+        "wires": [
+            [
+                "f677ab8c9c29a4a0",
+                "d18caacf9f4d63e8",
+                "6bd79f3ac8350cfb"
+            ]
+        ]
+    },
+    {
+        "id": "c38b3d52aee4badc",
+        "type": "ui_switch",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "label": "accesso",
+        "tooltip": "",
+        "group": "17c07df615b54e6b",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "decouple": "false",
+        "topic": "topic",
+        "topicType": "msg",
+        "style": "",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "animate": false,
+        "className": "",
+        "x": 580,
+        "y": 1600,
+        "wires": [
+            [
+                "6ec3b2eb4c6117b1"
+            ]
+        ]
+    },
+    {
+        "id": "f677ab8c9c29a4a0",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug rfid check",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 800,
+        "y": 1260,
+        "wires": []
+    },
+    {
+        "id": "d18caacf9f4d63e8",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "topic": "esp8266/sensor/door",
+        "qos": "1",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "fb9bd3109e3c5603",
+        "x": 840,
+        "y": 1340,
+        "wires": []
+    },
+    {
+        "id": "6bd79f3ac8350cfb",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "function 6",
+        "func": "if (msg.payload == '0' || msg.payload == '1')\n    return null;\nelse if (msg.payload == '-1'){\n    msg.payload = 'ON';\n}\nelse if (msg.payload == '-2')\n    msg.payload = 'OFF';\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 180,
+        "y": 1460,
+        "wires": [
+            [
+                "f040b43334078c02",
+                "e2e37eb15d2ce025"
+            ]
+        ]
+    },
+    {
+        "id": "f040b43334078c02",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug 13",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 220,
+        "y": 1580,
+        "wires": []
+    },
+    {
+        "id": "6ec3b2eb4c6117b1",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "function 7",
+        "func": "if (msg.payload == true) //abilitato a leggere\n    msg.payload = '-2';\nelse \n    msg.payload = '-1'; //disabilito\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 680,
+        "y": 1500,
+        "wires": [
+            [
+                "f8fe2d674d3d3d38",
+                "d18caacf9f4d63e8",
+                "26764479f4f39f8f",
+                "6bd79f3ac8350cfb"
+            ]
+        ]
+    },
+    {
+        "id": "e2e37eb15d2ce025",
+        "type": "ui_led",
+        "z": "f6f2187d.f17ca8",
+        "order": 8,
+        "group": "17c07df615b54e6b",
+        "width": 1,
+        "height": 1,
+        "label": "",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "ON",
+                "valueType": "str"
+            },
+            {
+                "color": "#808080",
+                "value": "OFF",
+                "valueType": "str"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "Led Fire",
+        "x": 420,
+        "y": 1460,
+        "wires": []
+    },
+    {
+        "id": "f8fe2d674d3d3d38",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug 14",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 900,
+        "y": 1520,
+        "wires": []
+    },
+    {
+        "id": "99bab8ce92e3cb39",
+        "type": "ui_text",
+        "z": "f6f2187d.f17ca8",
+        "group": "17c07df615b54e6b",
+        "order": 6,
+        "width": 5,
+        "height": 1,
+        "name": "",
+        "label": "disabled ",
+        "format": "{{msg.payload}}",
+        "layout": "row-left",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": "",
+        "color": "#000000",
+        "x": 420,
+        "y": 1580,
+        "wires": []
+    },
+    {
+        "id": "7b0ace41629f6ce2",
+        "type": "change",
+        "z": "f6f2187d.f17ca8",
+        "name": "Set OFF",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "OFF",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 960,
+        "y": 840,
+        "wires": [
+            [
+                "c3a808942cc30d0a"
+            ]
+        ]
+    },
+    {
+        "id": "6832e49dfd07d96c",
+        "type": "change",
+        "z": "f6f2187d.f17ca8",
+        "name": "Set ON",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "ON",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 960,
+        "y": 700,
+        "wires": [
+            [
+                "bc12d87aa9ec91dc"
+            ]
+        ]
+    },
+    {
+        "id": "9772bda67aa8c073",
+        "type": "switch",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 810,
+        "y": 740,
+        "wires": [
+            [
+                "6832e49dfd07d96c"
+            ],
+            [
+                "7b0ace41629f6ce2"
+            ]
+        ]
+    },
+    {
+        "id": "fb9bd3109e3c5603",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "17c07df615b54e6b",
+        "type": "ui_group",
+        "name": "Access",
+        "tab": "fa27a7f26273de6e",
+        "order": 3,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "61aa16a4269b1dac",
+        "type": "ui_group",
+        "name": "Temperature",
+        "tab": "fa27a7f26273de6e",
+        "order": 2,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "3d947904435b0faa",
+        "type": "ui_group",
+        "name": "Humidity",
+        "tab": "fa27a7f26273de6e",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "f8c0e607150ec3c8",
+        "type": "ui_group",
+        "name": "Actuator State",
+        "tab": "fa27a7f26273de6e",
+        "order": 4,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "ee544e2b1a513dc3",
+        "type": "ui_group",
+        "name": "Video Streaming",
+        "tab": "fa27a7f26273de6e",
+        "order": 5,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "fa27a7f26273de6e",
+        "type": "ui_tab",
+        "name": "Home",
+        "icon": "home",
+        "disabled": false,
+        "hidden": false
+    }
+]
